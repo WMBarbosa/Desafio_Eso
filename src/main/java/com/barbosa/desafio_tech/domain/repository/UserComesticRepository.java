@@ -18,5 +18,5 @@ public interface UserComesticRepository extends JpaRepository<UserCosmetic, Long
 
     boolean existsByUserIdAndCosmeticIdAndIsActiveTrue(Long userId, String cosmeticId);
 
-    Page<UserCosmetic> findByFirstnameLike(String name, Pageable pageable);
+    Page<UserCosmetic> findByCosmeticNameLike(String cosmeticName, Pageable pageable);
 }

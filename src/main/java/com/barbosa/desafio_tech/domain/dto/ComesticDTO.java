@@ -16,7 +16,7 @@ public class ComesticDTO {
     private String type;
     private String rarity;
     private String imageUrl;
-    private Integer price; // em v-bucks quando disponível (loja)
+    private Integer price;
     private Boolean isNew;
     private Boolean isOnSale;
 

@@ -82,10 +82,10 @@ public class FortniteApiService {
                     .bodyToMono(FortniteCosmeticsResponse.class)
                     .timeout(DEFAULT_TIMEOUT)
                     .map(response -> {
-                        if (response.getData() == null) {
+                        if (response.getData() == null || response.getData().getBr() == null) {
                             return List.<ComesticDTO>of();
                         }
-                        return mapCosmeticsAll(response.getData(), markAsSale);
+                        return mapCosmeticsAll(response.getData().getBr(), markAsSale);
                     })
                     .blockOptional()
                     .orElse(List.of());
@@ -94,6 +94,7 @@ public class FortniteApiService {
             return List.of();
         }
     }
+
 
 
 
@@ -119,17 +120,33 @@ public class FortniteApiService {
         }
     }
 
-    private List<ComesticDTO> mapCosmeticsAll(List<Map<String, Object>> rawData, boolean markAsSale) {
-        if (rawData == null || rawData.isEmpty()) {
+    private List<ComesticDTO> mapCosmeticsAll(List<FortniteCosmeticsResponse.CosmeticItem> items, boolean markAsSale) {
+        if (items == null || items.isEmpty()) {
             return List.of();
         }
 
-        return rawData.stream()
+        return items.stream()
                 .map(this::mapCosmetic)
                 .filter(Objects::nonNull)
                 .map(dto -> markAsSale ? withSaleFlag(dto) : dto)
                 .collect(Collectors.toList());
     }
+
+    private ComesticDTO mapCosmetic(FortniteCosmeticsResponse.CosmeticItem item) {
+        if (item == null) {
+            return null;
+        }
+
+        ComesticDTO dto = new ComesticDTO();
+        dto.setId(item.getId());
+        dto.setName(item.getName());
+        dto.setType(item.getType() != null ? item.getType().getDisplayValue() : null);
+        dto.setRarity(item.getRarity() != null ? item.getRarity().getDisplayValue() : null);
+        dto.setImageUrl(item.getImages() != null ? item.getImages().getSmallIcon() : null);
+        return dto;
+    }
+
+
 
 
     private ComesticDTO mapCosmeticShop(FortniteShopResponse.StoreEntry entry, boolean markAsSale) {

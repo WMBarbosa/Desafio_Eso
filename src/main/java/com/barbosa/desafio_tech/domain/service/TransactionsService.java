@@ -10,14 +10,15 @@ import com.barbosa.desafio_tech.domain.mappers.UserMapper;
 import com.barbosa.desafio_tech.domain.repository.TransactionRepository;
 import com.barbosa.desafio_tech.domain.repository.UserComesticRepository;
 import com.barbosa.desafio_tech.domain.repository.UserRepository;
+import com.barbosa.desafio_tech.domain.service.serviceException.ActiveUserException;
+import com.barbosa.desafio_tech.domain.service.serviceException.ComesticNotFoundException;
+import com.barbosa.desafio_tech.domain.service.serviceException.PriceInvalidException;
 import com.barbosa.desafio_tech.domain.service.serviceException.ResourceNotFoundException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +35,10 @@ public class TransactionsService {
 
         Integer price = cosmetic.getPrice();
         if (price == null || price <= 0) {
-            throw new IllegalArgumentException("Preço inválido para o item");
+            throw new PriceInvalidException("Preço inválido para o item");
         }
         if (userComesticRepository.existsByUserIdAndCosmeticIdAndIsActiveTrue(userId, cosmetic.getId())) {
-            throw new IllegalStateException("Usuário já possui esse item ativo");
+            throw new ActiveUserException("Usuário já possui esse item ativo");
         }
         if (user.getVbucks() < price) {
             throw new IllegalStateException("Saldo insuficiente");
@@ -63,7 +64,7 @@ public class TransactionsService {
     public UserDTO refundCosmetic(Long userId, String cosmeticId, Integer amount) {
         User user = loadUser(userId);
         UserCosmetic cosmetic = userComesticRepository.findByUserIdAndCosmeticIdAndIsActiveTrue(userId, cosmeticId)
-                .orElseThrow(() -> new EntityNotFoundException("Cosmético não encontrado para o usuário"));
+                .orElseThrow(() -> new ComesticNotFoundException(userId, cosmeticId));
 
         cosmetic.setIsActive(false);
         userComesticRepository.save(cosmetic);

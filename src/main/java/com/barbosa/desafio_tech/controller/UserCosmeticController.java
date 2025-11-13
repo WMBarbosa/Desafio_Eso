@@ -37,7 +37,7 @@ public class UserCosmeticController {
         return ResponseEntity.ok(cosmetic);
     }
 
-    @GetMapping("{/search}")
+    @GetMapping("/search")
     public ResponseEntity<UserCosmeticDTO> findNameLike(@RequestParam String name, Pageable pageable) {
         Page<UserCosmeticDTO> cosmetics = userCosmeticService.findByFirstnameLike(name, pageable);
         return ResponseEntity.ok().body(cosmetics.getContent()
